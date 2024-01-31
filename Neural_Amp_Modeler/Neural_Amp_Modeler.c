@@ -334,6 +334,7 @@ void plugin_port_event(LV2UI_Handle handle, uint32_t port_index,
                             free(ps->filename);
                             ps->filename = NULL;
                             ps->filename = strdup(uri);
+                            free(ps->dir_name);
                             ps->dir_name = NULL;
                             ps->dir_name = strdup(dirname((char*)uri));
                             FileButton *filebutton = (FileButton*)ui->widget[0]->private_struct;
