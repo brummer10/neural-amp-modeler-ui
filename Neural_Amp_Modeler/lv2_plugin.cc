@@ -159,12 +159,13 @@ static void draw_window(void *w_, void* user_data) {
         cairo_set_font_size (w->crb, w->app->normal_font);
         cairo_text_extents(w->crb, basename(ps->filename), &extents_f);
         
-        if (extents_f.width > 210 * w->app->hdpi-10) {
+        if (extents_f.width > 220 * w->app->hdpi-10) {
             int slen = strlen(basename(ps->filename));
-            int len = ((210 * w->app->hdpi-5)/(extents.width/slen));
+            int len = ((220 * w->app->hdpi-5)/(extents.width/slen));
             utf8crop(label,basename(ps->filename), min(slen-4,len-3));
             strcat(label,"...");
             tooltip_set_text(ui->widget[0],basename(ps->filename));
+            ui->widget[0]->flags |= HAS_TOOLTIP;
         } else {
             strcpy(label, basename(ps->filename));
             ui->widget[0]->flags &= ~HAS_TOOLTIP;
@@ -173,7 +174,7 @@ static void draw_window(void *w_, void* user_data) {
 
         cairo_text_extents(w->crb, label, &extents_f);
         double twf = extents_f.width/2.0;
-        cairo_move_to (w->crb, max(5,(w->scale.init_width*0.5)-twf), w->scale.init_height-35 * w->app->hdpi );
+        cairo_move_to (w->crb, max(110 * w->app->hdpi,(w->scale.init_width*0.5)-twf), w->scale.init_height-35 * w->app->hdpi );
         cairo_show_text(w->crb, label);       
     }
 #endif
