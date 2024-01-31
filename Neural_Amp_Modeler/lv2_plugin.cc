@@ -153,8 +153,8 @@ static void draw_window(void *w_, void* user_data) {
     X11_UI* ui = (X11_UI*)w->parent_struct;
     X11_UI_Private_t *ps = (X11_UI_Private_t*)ui->private_ptr;
     if (strlen(ps->filename)) {
-        char label[1024];
-        memset(label, '\0', sizeof(char)*1024);
+        char label[124];
+        memset(label, '\0', sizeof(char)*124);
         cairo_text_extents_t extents_f;
         cairo_set_font_size (w->crb, w->app->normal_font);
         cairo_text_extents(w->crb, basename(ps->filename), &extents_f);
