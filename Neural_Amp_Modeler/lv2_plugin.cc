@@ -159,9 +159,9 @@ static void draw_window(void *w_, void* user_data) {
         cairo_set_font_size (w->crb, w->app->normal_font);
         cairo_text_extents(w->crb, basename(ps->filename), &extents_f);
         
-        if (extents_f.width > 350 * w->app->hdpi-10) {
+        if (extents_f.width > 210 * w->app->hdpi-10) {
             int slen = strlen(basename(ps->filename));
-            int len = ((350 * w->app->hdpi-5)/(extents.width/slen));
+            int len = ((210 * w->app->hdpi-5)/(extents.width/slen));
             utf8crop(label,basename(ps->filename), min(slen-4,len-3));
             strcat(label,"...");
             tooltip_set_text(ui->widget[0],basename(ps->filename));
