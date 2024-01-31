@@ -161,7 +161,7 @@ static void draw_window(void *w_, void* user_data) {
         
         if ((int)extents_f.width > 220 * w->app->hdpi-10) {
             int slen = strlen(basename(ps->filename));
-            int len = 50;
+            int len = 48;
             utf8crop(label,basename(ps->filename), min(slen-4,len-3));
             strcat(label,"...");
             tooltip_set_text(ui->widget[0],basename(ps->filename));
