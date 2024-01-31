@@ -97,6 +97,22 @@ void round_rectangle(cairo_t *cr,float x, float y, float width, float height, fl
     cairo_close_path(cr);
 }
 
+char* utf8crop(char* dst, const char* src, size_t sizeDest ) {
+    if( sizeDest ){
+        size_t sizeSrc = strlen(src);
+        while( sizeSrc >= sizeDest ){
+            const char* lastByte = src + sizeSrc;
+            while( lastByte-- > src )
+                if((*lastByte & 0xC0) != 0x80)
+                    break;
+            sizeSrc = lastByte - src;
+        }
+        memcpy(dst, src, sizeSrc);
+        dst[sizeSrc] = '\0';
+    }
+    return dst;
+}
+
 // draw the window
 static void draw_window(void *w_, void* user_data) {
     Widget_t *w = (Widget_t*)w_;
@@ -137,12 +153,28 @@ static void draw_window(void *w_, void* user_data) {
     X11_UI* ui = (X11_UI*)w->parent_struct;
     X11_UI_Private_t *ps = (X11_UI_Private_t*)ui->private_ptr;
     if (strlen(ps->filename)) {
+        char label[124];
+        memset(label, '\0', sizeof(char)*124);
         cairo_text_extents_t extents_f;
         cairo_set_font_size (w->crb, w->app->normal_font);
         cairo_text_extents(w->crb, basename(ps->filename), &extents_f);
+        
+        if (extents_f.width > 350 * w->app->hdpi-10) {
+            int slen = strlen(basename(ps->filename));
+            int len = ((350 * w->app->hdpi-5)/(extents.width/slen));
+            utf8crop(label,basename(ps->filename), min(slen-4,len-3));
+            strcat(label,"...");
+            tooltip_set_text(ui->widget[0],basename(ps->filename));
+        } else {
+            strcpy(label, basename(ps->filename));
+            ui->widget[0]->flags &= ~HAS_TOOLTIP;
+            hide_tooltip(ui->widget[0]);
+        }
+
+        cairo_text_extents(w->crb, label, &extents_f);
         double twf = extents_f.width/2.0;
         cairo_move_to (w->crb, max(5,(w->scale.init_width*0.5)-twf), w->scale.init_height-35 * w->app->hdpi );
-        cairo_show_text(w->crb, basename(ps->filename));       
+        cairo_show_text(w->crb, label);       
     }
 #endif
 #ifndef HIDE_NAME

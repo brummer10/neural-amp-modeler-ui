@@ -40,6 +40,7 @@ typedef struct {
     LV2_Atom_Forge forge;
     X11LV2URIs   uris;
     char *filename;
+    char *dir_name;
 } X11_UI_Private_t;
 
 static inline void map_x11ui_uris(LV2_URID_Map* map, X11LV2URIs* uris) {
@@ -251,6 +252,7 @@ void plugin_create_controller_widgets(X11_UI *ui, const char * plugin_uri) {
     lv2_atom_forge_init(&ps->forge, ui->map);
     const X11LV2URIs* uris = &ps->uris;
     ps->filename = strdup("None");
+    ps->dir_name = NULL;
 #endif
 
     ui->widget[0] = add_lv2_file_button (ui->widget[0], ui->win, -4, "Neural Model", ui, 30,  254, 60, 30);
@@ -275,6 +277,7 @@ void plugin_cleanup(X11_UI *ui) {
 #ifdef USE_ATOM
     X11_UI_Private_t *ps = (X11_UI_Private_t*)ui->private_ptr;
     free(ps->filename);
+    free(ps->dir_name);
 #endif
     // clean up used sources when needed
 }
@@ -331,6 +334,10 @@ void plugin_port_event(LV2UI_Handle handle, uint32_t port_index,
                             free(ps->filename);
                             ps->filename = NULL;
                             ps->filename = strdup(uri);
+                            ps->dir_name = NULL;
+                            ps->dir_name = strdup(dirname((char*)uri));
+                            FileButton *filebutton = (FileButton*)ui->widget[0]->private_struct;
+                            filebutton->path = ps->dir_name;
                             expose_widget(ui->win);
                         }
                     }
