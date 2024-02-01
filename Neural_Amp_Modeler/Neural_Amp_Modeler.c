@@ -175,6 +175,22 @@ static void file_load_response(void *w_, void* user_data) {
     }
 }
 
+static void dnd_load_response(void *w_, void* user_data) {
+    if(user_data !=NULL) {
+        Widget_t *w = (Widget_t*)w_;
+        Widget_t *c = w->childlist->childs[0];
+        char* dndfile = NULL;
+        dndfile = strtok(*(char**)user_data, "\r\n");
+        while (dndfile != NULL) {
+            if (strstr(dndfile, ".nam")) {
+                file_load_response((void*)c, (void*)&dndfile);
+                break;
+            }
+            dndfile = strtok(NULL, "\r\n");
+        }
+    }
+}
+
 void send_controller_message(Widget_t *w, const LV2_URID control) {
     Widget_t *p = (Widget_t*)w->parent;
     X11_UI *ui = (X11_UI*) p->parent_struct;
@@ -254,6 +270,11 @@ void plugin_create_controller_widgets(X11_UI *ui, const char * plugin_uri) {
     ps->filename = strdup("None");
     ps->dir_name = NULL;
 #endif
+
+#ifdef __linux__
+    widget_set_dnd_aware(ui->win);
+#endif
+    ui->win->func.dnd_notify_callback = dnd_load_response;
 
     ui->widget[0] = add_lv2_file_button (ui->widget[0], ui->win, -4, "Neural Model", ui, 30,  254, 60, 30);
 #ifdef USE_ATOM
