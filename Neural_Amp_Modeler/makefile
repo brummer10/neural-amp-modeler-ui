@@ -49,7 +49,7 @@
 	SVGRESOURCE_EXTLD := $(notdir $(patsubst %.svg,%_svg,$(SVGRESOURCES)))
 ifeq ($(TARGET), Linux)
 	LDFLAGS += -fvisibility=hidden -I$(HEADER_DIR) -Wl,-Bstatic -L. $(UI_LIB) \
-	-Wl,-Bdynamic `pkg-config --cflags --libs cairo x11 lilv-0` \
+	-Wl,-Bdynamic `pkg-config --cflags --libs cairo x11 lv2` \
 	-shared -lm -fPIC -Wl,-z,noexecstack -Wl,--no-undefined -Wl,--gc-sections
 	CFLAGS := -O2 -D_FORTIFY_SOURCE=2 -Wall -fstack-protector -fvisibility=hidden \
 	-fdata-sections -Wl,--gc-sections -Wl,-z,relro,-z,now -Wl,--exclude-libs,ALL

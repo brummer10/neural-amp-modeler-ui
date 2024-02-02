@@ -283,12 +283,12 @@ void plugin_create_controller_widgets(X11_UI *ui, const char * plugin_uri) {
 #endif
 
     ui->widget[1] = add_lv2_knob (ui->widget[1], ui->win, 4, "Input", ui, 55,  80, 120, 140);
-    set_adjustment(ui->widget[1]->adj, 0.0, 0.0, -20.0, 20.0, 0.4, CL_CONTINUOS);
+    set_adjustment(ui->widget[1]->adj, 0.0, 0.0, -20.0, 20.0, 0.2, CL_CONTINUOS);
     set_widget_color(ui->widget[1], 0, 0, 0.3, 0.55, 0.91, 1.0);
     set_widget_color(ui->widget[1], 0, 3,  0.682, 0.686, 0.686, 1.0);
 
     ui->widget[2] = add_lv2_knob (ui->widget[2], ui->win, 5, "Output ", ui, 325,  80, 120, 140);
-    set_adjustment(ui->widget[2]->adj, 0.0, 0.0, -20.0, 20.0, 0.4, CL_CONTINUOS);
+    set_adjustment(ui->widget[2]->adj, 0.0, 0.0, -20.0, 20.0, 0.2, CL_CONTINUOS);
     set_widget_color(ui->widget[2], 0, 0, 0.3, 0.55, 0.91, 1.0);
     set_widget_color(ui->widget[2], 0, 3,  0.682, 0.686, 0.686, 1.0);
 

@@ -313,14 +313,9 @@ static void draw_my_knob(void *w_, void* user_data) {
     char s[17];
     char sa[17];
     float value = adj_get_value(w->adj);
-    const char* format[] = {"%.1f", "%.2f", "%.3f"};
-    if (fabs(w->adj->step)>0.99) {
-        snprintf(s, 16,"%d",  (int) value);
-    } else if (fabs(w->adj->step)>0.09) {
-        snprintf(s, 16, format[1-1], value);
-    } else {
-        snprintf(s, 16, format[2-1], value);
-    }
+    float v = copysign(1, (int)(value * 10));
+    value = copysign(value, v);
+    snprintf(s, 16, "%.1f", value);
     snprintf(sa, strlen(s),"%s",  "000000000000000");
     cairo_text_extents(w->crb, sa, &extents);
     int wx = extents.width * 0.5;
@@ -454,6 +449,8 @@ static LV2UI_Handle instantiate(const LV2UI_Descriptor * descriptor,
         return NULL;
     }
 
+    LV2_Options_Option *opts = NULL;
+
     ui->parentXwindow = 0;
     ui->private_ptr = NULL;
     ui->need_resize = 1;
@@ -470,6 +467,8 @@ static LV2UI_Handle instantiate(const LV2UI_Descriptor * descriptor,
     for (; features[i]; ++i) {
         if (!strcmp(features[i]->URI, LV2_UI__parent)) {
             ui->parentXwindow = features[i]->data;
+        } else if(!strcmp(features[i]->URI, LV2_OPTIONS__options)) {
+            opts = features[i]->data;
         } else if (!strcmp(features[i]->URI, LV2_UI__resize)) {
             ui->resize = (LV2UI_Resize*)features[i]->data;
         } else if (!strcmp(features[i]->URI, LV2_URID_URI "#map")) {
@@ -485,6 +484,21 @@ static LV2UI_Handle instantiate(const LV2UI_Descriptor * descriptor,
 
     // init Xputty
     main_init(&ui->main);
+
+    float scale = 1.0;
+    if (opts != NULL) {
+        const LV2_URID ui_scaleFactor = ui->map->map(ui->map->handle, LV2_UI__scaleFactor);
+        const LV2_URID atom_Float = ui->map->map(ui->map->handle, LV2_ATOM__Float);
+        for (const LV2_Options_Option* o = opts; o->key; ++o) {
+            if (o->context == LV2_OPTIONS_INSTANCE &&
+              o->key == ui_scaleFactor && o->type == atom_Float) {
+                scale = *(float*)o->value;
+                break;
+            }
+        }
+        if (scale > 1.0) ui->main.hdpi = scale;
+    }
+
     int w = 1;
     int h = 1;
     plugin_set_window_size(&w,&h,plugin_uri);

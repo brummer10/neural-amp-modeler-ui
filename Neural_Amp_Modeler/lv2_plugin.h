@@ -33,6 +33,10 @@
 #include <lv2/patch/patch.h>
 #endif
 
+#ifndef LV2_UI__scaleFactor
+#define LV2_UI__scaleFactor  "http://lv2plug.in/ns/extensions/ui#scaleFactor"
+#endif
+
 // xwidgets.h includes xputty.h and all defined widgets from Xputty
 #include "xwidgets.h"
 #include "xfile-dialog.h"
