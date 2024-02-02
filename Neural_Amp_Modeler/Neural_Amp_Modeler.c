@@ -134,7 +134,6 @@ static void notify_dsp(X11_UI *ui) {
     lv2_atom_forge_set_buffer(&ps->forge, obj_buf, OBJ_BUF_SIZE);
     LV2_Atom_Forge_Frame frame;
     LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object(&ps->forge, &frame, 0, uris->patch_Get);
-    lv2_atom_forge_key(&ps->forge, uris->patch_property);
 
     ui->write_function(ui->controller, 0, lv2_atom_total_size(msg),
                        ps->uris.atom_eventTransfer, msg);
