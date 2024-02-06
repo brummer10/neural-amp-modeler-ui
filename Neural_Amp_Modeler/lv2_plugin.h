@@ -60,6 +60,7 @@ typedef struct {
     Widget_t *widget[CONTROLS];
     Widget_t *elem[GUI_ELEMENTS];
     Widget_t *tab_elem[TAB_ELEMENTS];
+    Widget_t *file_button;
     void *private_ptr;
     int need_resize;
     int loop_counter;
@@ -84,6 +85,8 @@ const char* plugin_set_name();
 // create all needed controller 
 void plugin_create_controller_widgets(X11_UI *ui, const char * plugin_uri);
 
+Widget_t* add_lv2_button(Widget_t *w, Widget_t *p, const char * label,
+                                X11_UI* ui, int x, int y, int width, int height);
 
 Widget_t* add_lv2_knob(Widget_t *w, Widget_t *p, PortIndex index, const char * label,
                                 X11_UI* ui, int x, int y, int width, int height);

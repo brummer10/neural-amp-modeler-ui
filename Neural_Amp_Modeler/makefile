@@ -128,7 +128,10 @@ else
 endif
 
 uninstall :
-	@rm -rf $(INSTALL_DIR)/$(BUNDLE)
+	@rm $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)/$(EXEC_NAME)_ui.$(LIB_EXT)
+	@rm $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)/manifest.ttl
+	@rm $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)/Neural_Amp_Modeler_ui.ttl
+	@cp ./restore/manifest.ttl $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)
 	@echo ". ., done"
 
 clean:

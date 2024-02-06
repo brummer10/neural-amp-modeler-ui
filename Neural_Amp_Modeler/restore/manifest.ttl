@@ -1,0 +1,8 @@
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix state: <http://lv2plug.in/ns/ext/state#> .
+
+<http://github.com/mikeoliphant/neural-amp-modeler-lv2>
+	a lv2:Plugin;
+	lv2:binary <neural_amp_modeler.so>;
+	rdfs:seeAlso <neural_amp_modeler.ttl> .

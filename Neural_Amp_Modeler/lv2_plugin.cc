@@ -138,10 +138,10 @@ static void draw_window(void *w_, void* user_data) {
     use_text_color_scheme(w, NORMAL_);
     cairo_stroke (w->crb);
     cairo_set_source_rgba(w->crb, 0.1, 0.1, 0.1, 1);
-    round_rectangle(w->crb, 100 * w->app->hdpi, w->scale.init_height-55 * w->app->hdpi,
+    round_rectangle(w->crb, 90 * w->app->hdpi, w->scale.init_height-55 * w->app->hdpi,
                                             350 * w->app->hdpi, 30 * w->app->hdpi, 0.5);
     cairo_fill_preserve (w->crb);
-    boxShadowInset(w->crb,100 * w->app->hdpi,w->scale.init_height-55 * w->app->hdpi,
+    boxShadowInset(w->crb,90 * w->app->hdpi,w->scale.init_height-55 * w->app->hdpi,
                                             350 * w->app->hdpi, 30 * w->app->hdpi, true);
     cairo_fill (w->crb);
     if (w->image) {
@@ -172,7 +172,7 @@ static void draw_window(void *w_, void* user_data) {
 
         cairo_text_extents(w->crb, label, &extents_f);
         double twf = extents_f.width/2.0;
-        cairo_move_to (w->crb, max(110 * w->app->hdpi,(w->scale.init_width*0.5)-twf), w->scale.init_height-35 * w->app->hdpi );
+        cairo_move_to (w->crb, max(100 * w->app->hdpi,(w->scale.init_width*0.5)-twf), w->scale.init_height-35 * w->app->hdpi );
         cairo_show_text(w->crb, label);       
     }
 #endif
@@ -347,6 +347,91 @@ Widget_t* add_lv2_knob(Widget_t *w, Widget_t *p, PortIndex index, const char * l
     return w;
 }
 
+static void dummy_expose(void *w_, void* user_data) {
+}
+
+void roundrec(cairo_t *cr, double x, double y, double width, double height, double r) {
+    cairo_arc(cr, x+r, y+r, r, M_PI, 3*M_PI/2);
+    cairo_arc(cr, x+width-r, y+r, r, 3*M_PI/2, 0);
+    cairo_arc(cr, x+width-r, y+height-r, r, 0, M_PI/2);
+    cairo_arc(cr, x+r, y+height-r, r, M_PI/2, M_PI);
+    cairo_close_path(cr);
+}
+
+void draw_my_button(void *w_, void* user_data) {
+    Widget_t *w = (Widget_t*)w_;
+    if (!w) return;
+    Metrics_t metrics;
+    os_get_window_metrics(w, &metrics);
+    int width = metrics.width-3;
+    int height = metrics.height-4;
+    if (!metrics.visible) return;
+    if (!w->state && (int)w->adj_y->value)
+        w->state = 3;
+
+    roundrec(w->crb,2.0, 4.0, width, height, height*0.33);
+
+    if(w->state==0) {
+        cairo_set_line_width(w->crb, 1.0);
+        use_frame_color_scheme(w, PRELIGHT_);
+    } else if(w->state==1) {
+        cairo_set_line_width(w->crb, 1.5);
+        use_frame_color_scheme(w, PRELIGHT_);
+    } else if(w->state==2) {
+        cairo_set_line_width(w->crb, 1.0);
+        use_frame_color_scheme(w, PRELIGHT_);
+    } else if(w->state==3) {
+        cairo_set_line_width(w->crb, 1.0);
+        use_frame_color_scheme(w, PRELIGHT_);
+    }
+    cairo_stroke(w->crb); 
+
+    if(w->state==2) {
+        roundrec(w->crb,4.0, 6.0, width, height, height*0.33);
+        cairo_stroke(w->crb);
+        roundrec(w->crb,3.0, 4.0, width, height, height*0.33);
+        cairo_stroke(w->crb);
+    } else if (w->state==3) {
+        roundrec(w->crb,3.0, 4.0, width, height, height*0.33);
+        cairo_stroke(w->crb);
+    }
+
+    float offset = 0.0;
+    if(w->state==0) {
+        use_fg_color_scheme(w, NORMAL_);
+    } else if(w->state==1) {
+        use_fg_color_scheme(w, PRELIGHT_);
+        offset = 1.0;
+    } else if(w->state==2) {
+        use_fg_color_scheme(w, SELECTED_);
+        offset = 2.0;
+    } else if(w->state==3) {
+        use_fg_color_scheme(w, ACTIVE_);
+        offset = 1.0;
+    }
+    use_text_color_scheme(w, get_color_state(w));
+    int wa = width/1.1;
+    int h = height/2.2;
+    int wa1 = width/1.55;
+    int h1 = height/1.3;
+    int wa2 = width/2.8;
+   
+    cairo_move_to(w->crb, wa+offset, h+offset);
+    cairo_line_to(w->crb, wa1+offset, h1+offset);
+    cairo_line_to(w->crb, wa2+offset, h+offset);
+    cairo_line_to(w->crb, wa+offset, h+offset);
+    cairo_fill(w->crb);
+}
+
+Widget_t* add_lv2_button(Widget_t *w, Widget_t *p, const char * label,
+                                X11_UI* ui, int x, int y, int width, int height) {
+    w = add_combobox(p, label, x, y, width, height);
+    w->parent_struct = ui;
+    w->func.expose_callback = dummy_expose;
+    w->childlist->childs[0]->func.expose_callback = draw_my_button;
+    return w;
+}
+
 static void my_fdialog_response(void *w_, void* user_data) {
     Widget_t *w = (Widget_t*)w_;
     FileButton *filebutton = (FileButton *)w->private_struct;
@@ -454,7 +539,7 @@ static LV2UI_Handle instantiate(const LV2UI_Descriptor * descriptor,
     ui->parentXwindow = 0;
     ui->private_ptr = NULL;
     ui->need_resize = 1;
-    ui->loop_counter = 2;
+    ui->loop_counter = 4;
 
     int i = 0;
     for(;i<CONTROLS;i++)
