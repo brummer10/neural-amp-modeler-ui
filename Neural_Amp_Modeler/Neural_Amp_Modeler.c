@@ -330,6 +330,7 @@ void plugin_create_controller_widgets(X11_UI *ui, const char * plugin_uri) {
     set_widget_color(ui->widget[2], 0, 3,  0.682, 0.686, 0.686, 1.0);
 
     ui->file_button = add_lv2_button(ui->file_button, ui->win, "", ui, 450,  254, 22, 30);
+    combobox_set_pop_position(ui->file_button, 1);
     combobox_add_entry(ui->file_button, "None");
     ui->file_button->func.value_changed_callback = file_menu_callback;
 }
@@ -395,12 +396,17 @@ void plugin_port_event(LV2UI_Handle handle, uint32_t port_index,
                             free(ps->filename);
                             ps->filename = NULL;
                             ps->filename = strdup(uri);
-                            free(ps->dir_name);
-                            ps->dir_name = NULL;
-                            ps->dir_name = strdup(dirname((char*)uri));
-                            FileButton *filebutton = (FileButton*)ui->widget[0]->private_struct;
-                            filebutton->path = ps->dir_name;
-                            rebuild_file_menu(ui);
+                            char *dn = strdup(dirname((char*)uri));
+                            if (ps->dir_name == NULL || strcmp((const char*)ps->dir_name,
+                                                                    (const char*)dn) !=0) {
+                                free(ps->dir_name);
+                                ps->dir_name = NULL;
+                                ps->dir_name = strdup(dn);
+                                FileButton *filebutton = (FileButton*)ui->widget[0]->private_struct;
+                                filebutton->path = ps->dir_name;
+                                rebuild_file_menu(ui);
+                            }
+                            free(dn);
                             expose_widget(ui->win);
                         }
                     }
