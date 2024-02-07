@@ -149,7 +149,7 @@ static inline LV2_Atom* write_set_file(LV2_Atom_Forge* forge, const LV2_URID con
     lv2_atom_forge_key(forge, uris->patch_property);
     lv2_atom_forge_urid(forge, control);
     lv2_atom_forge_key(forge, uris->patch_value);
-    lv2_atom_forge_path(forge, filename, strlen(filename));
+    lv2_atom_forge_path(forge, filename, strlen(filename) + 1);
     lv2_atom_forge_pop(forge, &frame);
     return set;
 }
@@ -338,6 +338,7 @@ void plugin_create_controller_widgets(X11_UI *ui, const char * plugin_uri) {
 void plugin_cleanup(X11_UI *ui) {
 #ifdef USE_ATOM
     X11_UI_Private_t *ps = (X11_UI_Private_t*)ui->private_ptr;
+    free(ps->fname);
     free(ps->filename);
     free(ps->dir_name);
 #endif
