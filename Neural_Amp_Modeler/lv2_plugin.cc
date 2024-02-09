@@ -460,24 +460,29 @@ static void my_fbutton_callback(void *w_, void* user_data) {
     Widget_t *w = (Widget_t*)w_;
     FileButton *filebutton = (FileButton *)w->private_struct;
     if (w->flags & HAS_POINTER && adj_get_value(w->adj)){
-        filebutton->w = open_file_dialog(w,filebutton->path,filebutton->filter);
-#ifdef __linux__
-        Atom wmStateAbove = XInternAtom(w->app->dpy, "_NET_WM_STATE_ABOVE", 1 );
-        Atom wmNetWmState = XInternAtom(w->app->dpy, "_NET_WM_STATE", 1 );
-        XChangeProperty(w->app->dpy, filebutton->w->widget, wmNetWmState, XA_ATOM, 32, 
-            PropModeReplace, (unsigned char *) &wmStateAbove, 1); 
-#elif defined _WIN32
-        os_set_transient_for_hint(w, filebutton->w);
-#endif
         filebutton->is_active = true;
-        FileDialog *file_dialog = (FileDialog *)filebutton->w->parent_struct;
-        file_dialog->save_config = store_config;
-        adj_set_value(file_dialog->view->adj, filebutton->conf.list_view);
-        adj_set_value(file_dialog->w_hidden->adj, filebutton->conf.show_hidden);
-        os_resize_window(w->app->dpy, filebutton->w, filebutton->conf.width, filebutton->conf.height);
+        if (!filebutton->w) {
+            filebutton->w = open_file_dialog(w,filebutton->path,filebutton->filter);
+            filebutton->w->flags |= HIDE_ON_DELETE;
+#ifdef __linux__
+            Atom wmStateAbove = XInternAtom(w->app->dpy, "_NET_WM_STATE_ABOVE", 1 );
+            Atom wmNetWmState = XInternAtom(w->app->dpy, "_NET_WM_STATE", 1 );
+            XChangeProperty(w->app->dpy, filebutton->w->widget, wmNetWmState, XA_ATOM, 32, 
+                PropModeReplace, (unsigned char *) &wmStateAbove, 1); 
+#elif defined _WIN32
+            os_set_transient_for_hint(w, filebutton->w);
+#endif
+            FileDialog *file_dialog = (FileDialog *)filebutton->w->parent_struct;
+            file_dialog->save_config = store_config;
+            adj_set_value(file_dialog->view->adj, filebutton->conf.list_view);
+            adj_set_value(file_dialog->w_hidden->adj, filebutton->conf.show_hidden);
+            os_resize_window(w->app->dpy, filebutton->w, filebutton->conf.width, filebutton->conf.height);
+        } else {
+            widget_show_all(filebutton->w);
+        }
     } else if (w->flags & HAS_POINTER && !adj_get_value(w->adj)){
         if(filebutton->is_active)
-            destroy_widget(filebutton->w,w->app);
+            widget_hide(filebutton->w);
     }
 }
 
