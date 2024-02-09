@@ -141,13 +141,13 @@ static void notify_dsp(X11_UI *ui) {
                        ps->uris.atom_eventTransfer, msg);
 }
 
-static inline LV2_Atom* write_set_file(LV2_Atom_Forge* forge, const LV2_URID control,
-                        const X11LV2URIs* uris, const char* filename) {
+static inline LV2_Atom* write_set_file(LV2_Atom_Forge* forge,
+                const X11LV2URIs* uris, const char* filename) {
     LV2_Atom_Forge_Frame frame;
     LV2_Atom* set = (LV2_Atom*)lv2_atom_forge_object(
                         forge, &frame, 1, uris->patch_Set);
     lv2_atom_forge_key(forge, uris->patch_property);
-    lv2_atom_forge_urid(forge, control);
+    lv2_atom_forge_urid(forge, uris->neural_model);
     lv2_atom_forge_key(forge, uris->patch_value);
     lv2_atom_forge_path(forge, filename, strlen(filename) + 1);
     lv2_atom_forge_pop(forge, &frame);
@@ -159,14 +159,13 @@ static void file_load_response(void *w_, void* user_data) {
     Widget_t *p = (Widget_t*)w->parent;
     X11_UI *ui = (X11_UI*) p->parent_struct;
     X11_UI_Private_t *ps = (X11_UI_Private_t*)ui->private_ptr;
-    const LV2_URID urid = *(const LV2_URID*)w->parent_struct;
     if(user_data !=NULL) {
         free(ps->filename);
         ps->filename = NULL;
         ps->filename = strdup(*(const char**)user_data);
         uint8_t obj_buf[OBJ_BUF_SIZE];
         lv2_atom_forge_set_buffer(&ps->forge, obj_buf, OBJ_BUF_SIZE);
-        LV2_Atom* msg = (LV2_Atom*)write_set_file(&ps->forge, urid, &ps->uris, ps->filename);
+        LV2_Atom* msg = (LV2_Atom*)write_set_file(&ps->forge, &ps->uris, ps->filename);
         ui->write_function(ui->controller, 0, lv2_atom_total_size(msg),
                            ps->uris.atom_eventTransfer, msg);
         free(ps->filename);
@@ -190,45 +189,6 @@ static void dnd_load_response(void *w_, void* user_data) {
             }
             dndfile = strtok(NULL, "\r\n");
         }
-    }
-}
-
-void send_controller_message(Widget_t *w, const LV2_URID control) {
-    Widget_t *p = (Widget_t*)w->parent;
-    X11_UI *ui = (X11_UI*) p->parent_struct;
-    X11_UI_Private_t *ps = (X11_UI_Private_t*)ui->private_ptr;
-    const X11LV2URIs* uris = &ps->uris;
-    const float value = adj_get_value(w->adj);
-    uint8_t obj_buf[OBJ_BUF_SIZE];
-    lv2_atom_forge_set_buffer(&ps->forge, obj_buf, OBJ_BUF_SIZE);
-    LV2_Atom_Forge_Frame frame;
-    LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object(&ps->forge, &frame, 0, uris->patch_Set);
-    lv2_atom_forge_key(&ps->forge, uris->patch_property);
-    lv2_atom_forge_urid(&ps->forge, control);
-    lv2_atom_forge_key(&ps->forge, uris->patch_value);
-    switch(w->data) {
-        case -2:
-             lv2_atom_forge_int(&ps->forge, (int)value);
-        break;
-        case -3:
-             lv2_atom_forge_bool(&ps->forge, (int)value);
-        break;
-        default:
-            lv2_atom_forge_float(&ps->forge, value);
-        break;
-    }
-    lv2_atom_forge_pop(&ps->forge, &frame);
-    ui->write_function(ui->controller, 0, lv2_atom_total_size(msg),
-                       ps->uris.atom_eventTransfer, msg);
-}
-
-void controller_callback(void *w_, void* user_data) {
-    Widget_t *w = (Widget_t*)w_;
-    const LV2_URID urid = *(const LV2_URID*)w->parent_struct;
-    if (w->data == -4) {
-        file_load_response(w, user_data);
-    } else {
-        send_controller_message(w, urid);
     }
 }
 
@@ -316,7 +276,7 @@ void plugin_create_controller_widgets(X11_UI *ui, const char * plugin_uri) {
     ui->widget[0] = add_lv2_file_button (ui->widget[0], ui->win, -4, "Neural Model", ui, 30,  254, 60, 30);
 #ifdef USE_ATOM
     ui->widget[0]->parent_struct = (void*)&uris->neural_model;
-    ui->widget[0]->func.user_callback = controller_callback;
+    ui->widget[0]->func.user_callback = file_load_response;
 #endif
 
     ui->widget[1] = add_lv2_knob (ui->widget[1], ui->win, 4, "Input", ui, 55,  80, 120, 140);
