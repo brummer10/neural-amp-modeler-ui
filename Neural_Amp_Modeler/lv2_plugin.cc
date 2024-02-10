@@ -448,14 +448,6 @@ static void my_fdialog_response(void *w_, void* user_data) {
     adj_set_value(w->adj,0.0);
 }
 
-static void store_config(Widget_t *w, int width, int height, float list_view, float show_hidden) {
-    FileButton *filebutton = (FileButton *)w->private_struct;
-    filebutton->conf.width = width;
-    filebutton->conf.height = height;
-    filebutton->conf.list_view = list_view;
-    filebutton->conf.show_hidden = show_hidden;
-}
-
 static void my_fbutton_callback(void *w_, void* user_data) {
     Widget_t *w = (Widget_t*)w_;
     FileButton *filebutton = (FileButton *)w->private_struct;
@@ -472,11 +464,6 @@ static void my_fbutton_callback(void *w_, void* user_data) {
 #elif defined _WIN32
             os_set_transient_for_hint(w, filebutton->w);
 #endif
-            FileDialog *file_dialog = (FileDialog *)filebutton->w->parent_struct;
-            file_dialog->save_config = store_config;
-            adj_set_value(file_dialog->view->adj, filebutton->conf.list_view);
-            adj_set_value(file_dialog->w_hidden->adj, filebutton->conf.show_hidden);
-            os_resize_window(w->app->dpy, filebutton->w, filebutton->conf.width, filebutton->conf.height);
         } else {
             widget_show_all(filebutton->w);
         }
@@ -503,10 +490,6 @@ Widget_t *add_my_file_button(Widget_t *parent, int x, int y, int width, int heig
     filebutton->last_path = NULL;
     filebutton->w = NULL;
     filebutton->is_active = false;
-    filebutton->conf.width = 660 * parent->app->hdpi;
-    filebutton->conf.height = 415 * parent->app->hdpi;
-    filebutton->conf.list_view = 0.0;
-    filebutton->conf.show_hidden = 0.0;
     Widget_t *fbutton = add_toggle_button(parent, ". . .", x, y, width, height);
     fbutton->private_struct = filebutton;
     fbutton->flags |= HAS_MEM;
