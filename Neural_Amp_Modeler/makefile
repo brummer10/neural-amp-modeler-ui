@@ -70,11 +70,14 @@ endif
 
 all: $(RESOURCEHEADER) $(EXEC_NAME)
 
-	@mkdir -p ../bin/$(BUNDLE)
-	@cp ./*.ttl ../bin/$(BUNDLE)
-	@cp ./*.$(LIB_EXT) ../bin/$(BUNDLE)
-	@if [ -f ../bin/$(BUNDLE)/$(EXEC_NAME)_ui.$(LIB_EXT) ]; then echo "build finish, now run make install"; \
-	else echo "sorry, build failed"; fi
+	$(QUIET)mkdir -p ../bin/$(BUNDLE)
+	$(QUIET)cp ./*.ttl ../bin/$(BUNDLE)
+	$(QUIET)cp ./*.$(LIB_EXT) ../bin/$(BUNDLE)
+	@if [ -f ../bin/$(BUNDLE)/$(EXEC_NAME)_ui.$(LIB_EXT) ]; then \
+		$(B_ECHO) "build finish, . . . $(reset)"; \
+	else \
+		$(R_ECHO) "sorry, build failed$(reset)"; \
+	fi
 
 $(RESOURCEHEADER): $(RESOURCES_OBJ)
 	@rm -f $(RESOURCEHEADER)
@@ -112,9 +115,9 @@ $(SVGRESOURCES_OBJ): $(SVGRESOURCES)
 
 $(EXEC_NAME):$(RESOURCES_OBJ) $(SVGRESOURCES_OBJ)
 	@# use this line when you include libxputty as submodule
-	@$(CC) -DUSE_ATOM  $(CFLAGS) '$(NAME).c' -L. $(RESOURCES_LIB) -L. $(SVGRESOURCES_LIB) $(UI_LIB) -o '$(EXEC_NAME)_ui.$(LIB_EXT)' $(LDFLAGS) -I./ -I$(HEADER_DIR)
+	$(QUIET)$(CC) -DUSE_ATOM  $(CFLAGS) '$(NAME).c' -L. $(RESOURCES_LIB) -L. $(SVGRESOURCES_LIB) $(UI_LIB) -o '$(EXEC_NAME)_ui.$(LIB_EXT)' $(LDFLAGS) -I./ -I$(HEADER_DIR)
 	@#$(CC) -DUSE_ATOM  $(CFLAGS) '$(NAME).c' -L. $(RESOURCES_LIB) -L. $(SVGRESOURCES_LIB) -o '$(EXEC_NAME)_ui.$(LIB_EXT)' $(LDFLAGS) -I./
-	@$(STRIP) -s -x -X -R .comment -R .note.ABI-tag $(EXEC_NAME)_ui.$(LIB_EXT)
+	$(QUIET)$(STRIP) -s -x -X -R .comment -R .note.ABI-tag $(EXEC_NAME)_ui.$(LIB_EXT)
 
 $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE):
 	@$(error "Couldn't find neural_amp_modeler.lv2 install location")
@@ -122,17 +125,17 @@ $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE):
 install : | $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)
 ifneq ("$(wildcard ../bin/$(BUNDLE))","")
 	@cp -r ../bin/$(BUNDLE)/* $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)
-	@echo ". ., done"
+	@$(B_ECHO) ". ., done$(reset)"
 else
-	@echo ". ., you must build first"
+	@$(R_ECHO) ". ., you must build first$(reset)"
 endif
 
 uninstall :
-	@rm $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)/$(EXEC_NAME)_ui.$(LIB_EXT)
-	@rm $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)/manifest.ttl
-	@rm $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)/Neural_Amp_Modeler_ui.ttl
-	@cp ./restore/manifest.ttl $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)
-	@echo ". ., done"
+	$(QUIET)rm $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)/$(EXEC_NAME)_ui.$(LIB_EXT)
+	$(QUIET)rm $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)/manifest.ttl
+	$(QUIET)rm $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)/Neural_Amp_Modeler_ui.ttl
+	$(QUIET)cp ./restore/manifest.ttl $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)
+	@$(B_ECHO) ". ., done$(reset)"
 
 clean:
 	$(QUIET)rm -f *.a  *.lib *.o *.so *.dll xresources.h
