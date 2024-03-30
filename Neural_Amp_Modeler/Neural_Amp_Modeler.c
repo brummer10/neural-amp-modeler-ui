@@ -236,8 +236,6 @@ void strrem(char *str, const char *sub) {
 
 void read_meta_data(const char* nam_file, X11_UI* ui) {
     ui->fileSampleRate = 0;
-    memset(ui->uiModelName, '\0', sizeof(char)*124);
-    strncpy(ui->uiModelName, "---", 123);
     FILE *fpm;
     char buf[2400];
     if((fpm = fopen(nam_file, "r")) == NULL) {
@@ -405,6 +403,8 @@ void plugin_port_event(LV2UI_Handle handle, uint32_t port_index,
                 const LV2_Atom*  file_uri = read_set_file(uris, ui, obj);
                 if (file_uri) {
                     const char* uri = (const char*)LV2_ATOM_BODY(file_uri);
+                    memset(ui->uiModelName, '\0', sizeof(char)*124);
+                    strncpy(ui->uiModelName, "---", 123);
                     if (strlen(uri)) {
                         if (strcmp(uri, (const char*)ps->filename) !=0) {
                             free(ps->filename);
