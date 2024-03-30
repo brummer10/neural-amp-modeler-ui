@@ -69,6 +69,7 @@ typedef struct {
     int uiSampleRate;
     int fileSampleRate;
     char uiModelName[124];
+    char uiModelBy[124];
     LV2_URID_Map* map;
     void *controller;
     LV2UI_Write_Function write_function;

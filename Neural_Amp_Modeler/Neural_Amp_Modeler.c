@@ -247,11 +247,16 @@ void read_meta_data(const char* nam_file, X11_UI* ui) {
             if (strstr(ptr, "name") != NULL) {
                 ptr = strtok(NULL, ",");
                 strrem(ptr, "\"");
-                strncpy(ui->uiModelName, ptr, 123);
-          /*  } else if (strstr(ptr, "modeled_by") != NULL) {
+                if (strlen(ptr) && !strstr(ptr, "null"))
+                    strncpy(ui->uiModelName, ptr, 123);
+            } else if (strstr(ptr, "modeled_by") != NULL) {
                 ptr = strtok(NULL, ",");
-                fprintf(stderr, "modeled_by: %s\n",ptr);
-            } else if (strstr(ptr, "gear_type") != NULL) {
+                strrem(ptr, "\"");
+                if (strlen(ptr) && !strstr(ptr, "null")) {
+                    strncpy(ui->uiModelBy, "by: ", 6);
+                    strncat(ui->uiModelBy, ptr, 117);
+                }
+          /*  } else if (strstr(ptr, "gear_type") != NULL) {
                 ptr = strtok(NULL, ",");
                 fprintf(stderr, "gear_type: %s\n",ptr);
             } else if (strstr(ptr, "gear_model") != NULL) {
@@ -405,6 +410,8 @@ void plugin_port_event(LV2UI_Handle handle, uint32_t port_index,
                     const char* uri = (const char*)LV2_ATOM_BODY(file_uri);
                     memset(ui->uiModelName, '\0', sizeof(char)*124);
                     strncpy(ui->uiModelName, "---", 123);
+                    memset(ui->uiModelBy, '\0', sizeof(char)*124);
+                    strncpy(ui->uiModelBy, "---", 123);
                     if (strlen(uri)) {
                         if (strcmp(uri, (const char*)ps->filename) !=0) {
                             free(ps->filename);

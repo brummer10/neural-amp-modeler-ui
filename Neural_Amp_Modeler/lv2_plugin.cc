@@ -177,9 +177,24 @@ static void draw_window(void *w_, void* user_data) {
 
         cairo_text_extents(w->crb, ui->uiModelName, &extents_f);
         twf = extents_f.width/2.0;
-        cairo_move_to (w->crb, max(100 * w->app->hdpi,(w->scale.init_width*0.5)-twf), w->scale.init_height-235 * w->app->hdpi );
+        cairo_move_to (w->crb, max(100 * w->app->hdpi,(w->scale.init_width*0.5)-twf), w->scale.init_height-240 * w->app->hdpi );
         cairo_show_text(w->crb, ui->uiModelName);
-    }
+
+        cairo_text_extents(w->crb, ui->uiModelBy, &extents_f);
+        twf = extents_f.width/2.0;
+        cairo_move_to (w->crb, max(100 * w->app->hdpi,(w->scale.init_width*0.5)-twf), w->scale.init_height-225 * w->app->hdpi );
+        cairo_show_text(w->crb, ui->uiModelBy);
+
+        if (ui->fileSampleRate) {
+            char label[32];
+            memset(label, '\0', sizeof(char)*32);
+            sprintf(label, "%iHz", ui->fileSampleRate);
+            cairo_text_extents(w->crb, label, &extents_f);
+            twf = extents_f.width/2.0;
+            cairo_move_to (w->crb, max(100 * w->app->hdpi,(w->scale.init_width*0.5)-twf), w->scale.init_height-210 * w->app->hdpi );
+            cairo_show_text(w->crb, label);
+        }
+   }
 #endif
 #ifndef HIDE_NAME
     cairo_set_font_size (w->crb, w->app->big_font+8);
@@ -547,6 +562,8 @@ static LV2UI_Handle instantiate(const LV2UI_Descriptor * descriptor,
     ui->uiSampleRate = 0;
     memset(ui->uiModelName, '\0', sizeof(char)*124);
     strncpy(ui->uiModelName, "---", 123);
+    memset(ui->uiModelBy, '\0', sizeof(char)*124);
+    strncpy(ui->uiModelBy, "---", 123);
    
 
     int i = 0;
