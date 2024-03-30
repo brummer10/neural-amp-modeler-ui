@@ -25,6 +25,7 @@
 #include <lv2/worker/worker.h>
 #include <lv2/atom/atom.h>
 #include <lv2/options/options.h>
+#include <lv2/parameters/parameters.h>
 #if defined USE_ATOM || defined USE_MIDI
 #include <lv2/atom/util.h>
 #include <lv2/atom/forge.h>
@@ -64,6 +65,10 @@ typedef struct {
     void *private_ptr;
     int need_resize;
     int loop_counter;
+    bool uiKnowSampleRate;
+    int uiSampleRate;
+    int fileSampleRate;
+    char uiModelName[124];
     LV2_URID_Map* map;
     void *controller;
     LV2UI_Write_Function write_function;

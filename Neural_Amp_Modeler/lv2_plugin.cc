@@ -173,7 +173,12 @@ static void draw_window(void *w_, void* user_data) {
         cairo_text_extents(w->crb, label, &extents_f);
         double twf = extents_f.width/2.0;
         cairo_move_to (w->crb, max(100 * w->app->hdpi,(w->scale.init_width*0.5)-twf), w->scale.init_height-35 * w->app->hdpi );
-        cairo_show_text(w->crb, label);       
+        cairo_show_text(w->crb, label);
+
+        cairo_text_extents(w->crb, ui->uiModelName, &extents_f);
+        twf = extents_f.width/2.0;
+        cairo_move_to (w->crb, max(100 * w->app->hdpi,(w->scale.init_width*0.5)-twf), w->scale.init_height-235 * w->app->hdpi );
+        cairo_show_text(w->crb, ui->uiModelName);
     }
 #endif
 #ifndef HIDE_NAME
@@ -185,6 +190,15 @@ static void draw_window(void *w_, void* user_data) {
     use_text_color_scheme(w, NORMAL_);
     cairo_stroke (w->crb);
 #endif
+    if (ui->uiKnowSampleRate && ui->fileSampleRate && ui->uiSampleRate != ui->fileSampleRate) {
+        cairo_set_font_size (w->crb, w->app->normal_font);
+        cairo_set_source_rgba(w->crb, 0.85, 0.05, 0.05, 1);
+        char label[124];
+        memset(label, '\0', sizeof(char)*124);
+        sprintf(label, "File Sample Rate %iHz didn't match Session Sample Rate %iHz", ui->fileSampleRate, ui->uiSampleRate);
+        cairo_move_to (w->crb, 50 * w->app->hdpi, w->scale.init_height-70 * w->app->hdpi );
+        cairo_show_text(w->crb, label);       
+    }
     widget_reset_scale(w);
     cairo_new_path (w->crb);
 }
@@ -528,6 +542,12 @@ static LV2UI_Handle instantiate(const LV2UI_Descriptor * descriptor,
     ui->private_ptr = NULL;
     ui->need_resize = 1;
     ui->loop_counter = 4;
+    ui->uiKnowSampleRate = false;
+    ui->fileSampleRate = 0;
+    ui->uiSampleRate = 0;
+    memset(ui->uiModelName, '\0', sizeof(char)*124);
+    strncpy(ui->uiModelName, "---", 123);
+   
 
     int i = 0;
     for(;i<CONTROLS;i++)
@@ -562,11 +582,17 @@ static LV2UI_Handle instantiate(const LV2UI_Descriptor * descriptor,
     if (opts != NULL) {
         const LV2_URID ui_scaleFactor = ui->map->map(ui->map->handle, LV2_UI__scaleFactor);
         const LV2_URID atom_Float = ui->map->map(ui->map->handle, LV2_ATOM__Float);
+        const LV2_URID ui_sampleRate = ui->map->map(ui->map->handle, LV2_PARAMETERS__sampleRate);
         for (const LV2_Options_Option* o = opts; o->key; ++o) {
             if (o->context == LV2_OPTIONS_INSTANCE &&
               o->key == ui_scaleFactor && o->type == atom_Float) {
                 scale = *(float*)o->value;
-                break;
+                //break;
+            } else if (o->context == LV2_OPTIONS_INSTANCE &&
+              o->key == ui_sampleRate && o->type == atom_Float) {
+                ui->uiKnowSampleRate = true;
+                ui->uiSampleRate = (int)*(float*)o->value;
+                //fprintf(stderr, "SampleRate = %iHz\n",(int)*(float*)o->value);
             }
         }
         if (scale > 1.0) ui->main.hdpi = scale;

@@ -220,6 +220,59 @@ static void file_menu_callback(void *w_, void* user_data) {
     file_load_response(ui->widget[0], (void*)&ps->fname);
 }
 
+
+void strrem(char *str, const char *sub) {
+    char *p, *q, *r;
+    if ((q = r = strstr(str, sub)) != NULL) {
+        size_t len = strlen(sub);
+        while ((r = strstr(p = r + len, sub)) != NULL) {
+            while (p < r)
+                *q++ = *p++;
+        }
+        while ((*q++ = *p++) != '\0')
+            continue;
+    }
+}
+
+void read_meta_data(const char* nam_file, X11_UI* ui) {
+    ui->fileSampleRate = 0;
+    memset(ui->uiModelName, '\0', sizeof(char)*124);
+    strncpy(ui->uiModelName, "---", 123);
+    FILE *fpm;
+    char buf[2400];
+    if((fpm = fopen(nam_file, "r")) == NULL) {
+        return;
+    }
+    while (fgets(buf, 2400, fpm) != NULL) {
+        char *ptr = strtok(buf, ":");
+        while(ptr != NULL) {
+            if (strstr(ptr, "name") != NULL) {
+                ptr = strtok(NULL, ",");
+                strrem(ptr, "\"");
+                strncpy(ui->uiModelName, ptr, 123);
+          /*  } else if (strstr(ptr, "modeled_by") != NULL) {
+                ptr = strtok(NULL, ",");
+                fprintf(stderr, "modeled_by: %s\n",ptr);
+            } else if (strstr(ptr, "gear_type") != NULL) {
+                ptr = strtok(NULL, ",");
+                fprintf(stderr, "gear_type: %s\n",ptr);
+            } else if (strstr(ptr, "gear_model") != NULL) {
+                ptr = strtok(NULL, ",");
+                fprintf(stderr, "gear_model: %s\n",ptr);
+            } else if (strstr(ptr, "tone_type") != NULL) {
+                ptr = strtok(NULL, "}");
+                fprintf(stderr, "tone_type: %s\n",ptr); */
+            } else if (strstr(ptr, "sample_rate") != NULL) {
+                ptr = strtok(NULL, "}");
+                ui->fileSampleRate = (int)strtod(ptr, NULL);
+            }
+            ptr = strtok(NULL, ":");
+        }
+    }
+    fclose(fpm);
+}
+
+
 static void rebuild_file_menu(X11_UI *ui) {
     ui->file_button->func.value_changed_callback = dummy_callback;
     X11_UI_Private_t *ps = (X11_UI_Private_t*)ui->private_ptr;
@@ -357,6 +410,7 @@ void plugin_port_event(LV2UI_Handle handle, uint32_t port_index,
                             free(ps->filename);
                             ps->filename = NULL;
                             ps->filename = strdup(uri);
+                            read_meta_data(ps->filename, ui);
                             char *dn = strdup(dirname((char*)uri));
                             if (ps->dir_name == NULL || strcmp((const char*)ps->dir_name,
                                                                     (const char*)dn) !=0) {
