@@ -49,7 +49,7 @@
 	SVGRESOURCE_EXTLD := $(notdir $(patsubst %.svg,%_svg,$(SVGRESOURCES)))
 ifeq ($(TARGET), Linux)
 	LDFLAGS += -fvisibility=hidden -I$(HEADER_DIR) -Wl,-Bstatic -L. $(UI_LIB) \
-	-Wl,-Bdynamic `pkg-config --cflags --libs cairo x11 lv2` \
+	-Wl,-Bdynamic `pkg-config --cflags --libs cairo x11 lv2` -pthread -lpthread \
 	-shared -lm -fPIC -Wl,-z,noexecstack -Wl,--no-undefined -Wl,--gc-sections
 	CFLAGS := -O2 -D_FORTIFY_SOURCE=2 -Wall -fstack-protector -fvisibility=hidden \
 	-fdata-sections -Wl,--gc-sections -Wl,-z,relro,-z,now -Wl,--exclude-libs,ALL
@@ -57,8 +57,7 @@ else ifeq ($(TARGET), Windows)
 	CXXFLAGS += -D_FORTIFY_SOURCE=2 -I. -I./dsp -I./plugin -fPIC -DPIC -O2 -Wall -funroll-loops \
 	-fstack-protector -ffast-math -fomit-frame-pointer -fstrength-reduce \
 	-fdata-sections -Wl,--gc-sections -Wl,--exclude-libs,ALL $(SSE_CFLAGS)
-	LDFLAGS += -I. -shared -lm $(PAWPAW_LFLAGS)
-	GUI_LDFLAGS += -I$(HEADER_DIR) -static-libgcc -static-libstdc++ \
+	LDFLAGS += -I. -shared -lm -I$(HEADER_DIR) -static-libgcc -static-libstdc++ \
 	`$(PKGCONFIG) $(PKGCONFIG_FLAGS) --cflags --libs cairo ` \
 	-L. $(LIB_DIR)libxputty.$(STATIC_LIB_EXT) -shared  -lm $(PAWPAW_LFLAGS)
 	TTLUPDATE = sed -i '/lv2:binary/ s/\.so/\.dll/ ' ../bin/$(BUNDLE)/manifest.ttl
