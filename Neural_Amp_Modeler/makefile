@@ -47,22 +47,30 @@
 	SVGRESOURCES_OBJ := $(notdir $(patsubst %.svg,%.o,$(SVGRESOURCES)))
 	SVGRESOURCES_C := $(notdir $(patsubst %.svg,%.c,$(SVGRESOURCES)))
 	SVGRESOURCE_EXTLD := $(notdir $(patsubst %.svg,%_svg,$(SVGRESOURCES)))
+
 ifeq ($(TARGET), Linux)
+
 	LDFLAGS += -fvisibility=hidden -I$(HEADER_DIR) -Wl,-Bstatic -L. $(UI_LIB) \
 	-Wl,-Bdynamic `pkg-config --cflags --libs cairo x11 lv2` -pthread -lpthread \
 	-shared -lm -fPIC -Wl,-z,noexecstack -Wl,--no-undefined -Wl,--gc-sections
+
 	CFLAGS := -O2 -D_FORTIFY_SOURCE=2 -Wall -fstack-protector -fvisibility=hidden \
 	-fdata-sections -Wl,--gc-sections -Wl,-z,relro,-z,now -Wl,--exclude-libs,ALL
+
 else ifeq ($(TARGET), Windows)
-	CXXFLAGS += -D_FORTIFY_SOURCE=2 -I. -I./dsp -I./plugin -fPIC -DPIC -O2 -Wall -funroll-loops \
-	-fstack-protector -ffast-math -fomit-frame-pointer -fstrength-reduce \
-	-fdata-sections -Wl,--gc-sections -Wl,--exclude-libs,ALL $(SSE_CFLAGS)
-	LDFLAGS += -I. -shared -lm -I$(HEADER_DIR) -static-libgcc -static-libstdc++ \
+
+	LDFLAGS += -I. -I$(HEADER_DIR) -static-libgcc -static-libstdc++ \
 	`$(PKGCONFIG) $(PKGCONFIG_FLAGS) --cflags --libs cairo ` \
-	-L. $(LIB_DIR)libxputty.$(STATIC_LIB_EXT) -shared  -lm $(PAWPAW_LFLAGS)
+	-L. $(LIB_DIR)libxputty.$(STATIC_LIB_EXT) -shared -lm $(PAWPAW_LFLAGS)
+
+	CFLAGS := -O2 -D_FORTIFY_SOURCE=2 -Wall -fstack-protector -fvisibility=hidden \
+	-fdata-sections -Wl,--gc-sections -Wl,--exclude-libs,ALL
+
 	TTLUPDATE = sed -i '/lv2:binary/ s/\.so/\.dll/ ' ../bin/$(BUNDLE)/manifest.ttl
 	TTLUPDATEGUI = sed -i '/a guiext:X11UI/ s/X11UI/WindowsUI/ ; /lv2:binary/ s/\.so/\.dll/ ' ../bin/$(BUNDLE)/$(NAME)_ui.ttl
+
 endif
+
 .PHONY : all install uninstall
 
 .NOTPARALLEL:
@@ -75,7 +83,7 @@ all: $(RESOURCEHEADER) $(EXEC_NAME)
 	$(QUIET)$(TTLUPDATEGUI)
 	$(QUIET)cp ./*.$(LIB_EXT) ../bin/$(BUNDLE)
 	@if [ -f ../bin/$(BUNDLE)/$(EXEC_NAME)_ui.$(LIB_EXT) ]; then \
-		$(B_ECHO) "build finish, . . . $(reset)"; \
+		$(B_ECHO) "=================== DONE =======================$(reset)"; \
 	else \
 		$(R_ECHO) "sorry, build failed$(reset)"; \
 	fi
@@ -115,6 +123,7 @@ $(SVGRESOURCES_OBJ): $(SVGRESOURCES)
 	$(AR) rcs $(patsubst %.o,%.$(STATIC_LIB_EXT),$@) $@
 
 $(EXEC_NAME):$(RESOURCES_OBJ) $(SVGRESOURCES_OBJ)
+	@$(B_ECHO) "Compiling $(EXEC_NAME)_ui.$(LIB_EXT) $(reset)"
 	@# use this line when you include libxputty as submodule
 	$(QUIET)$(CC) -DUSE_ATOM  $(CFLAGS) '$(NAME).c' -L. $(RESOURCES_LIB) -L. $(SVGRESOURCES_LIB) $(UI_LIB) -o '$(EXEC_NAME)_ui.$(LIB_EXT)' $(LDFLAGS) -I./ -I$(HEADER_DIR)
 	@#$(CC) -DUSE_ATOM  $(CFLAGS) '$(NAME).c' -L. $(RESOURCES_LIB) -L. $(SVGRESOURCES_LIB) -o '$(EXEC_NAME)_ui.$(LIB_EXT)' $(LDFLAGS) -I./
