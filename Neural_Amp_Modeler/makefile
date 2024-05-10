@@ -61,7 +61,7 @@ else ifeq ($(TARGET), Windows)
 	`$(PKGCONFIG) $(PKGCONFIG_FLAGS) --cflags --libs cairo ` \
 	-L. $(LIB_DIR)libxputty.$(STATIC_LIB_EXT) -shared  -lm $(PAWPAW_LFLAGS)
 	TTLUPDATE = sed -i '/lv2:binary/ s/\.so/\.dll/ ' ../bin/$(BUNDLE)/manifest.ttl
-	TTLUPDATEGUI = sed -i '/a guiext:X11UI/ s/X11UI/WindowsUI/ ; /guiext:binary/ s/\.so/\.dll/ ' ../bin/$(BUNDLE)/$(NAME).ttl
+	TTLUPDATEGUI = sed -i '/a guiext:X11UI/ s/X11UI/WindowsUI/ ; /lv2:binary/ s/\.so/\.dll/ ' ../bin/$(BUNDLE)/$(NAME)_ui.ttl
 endif
 .PHONY : all install uninstall
 
@@ -71,6 +71,8 @@ all: $(RESOURCEHEADER) $(EXEC_NAME)
 
 	$(QUIET)mkdir -p ../bin/$(BUNDLE)
 	$(QUIET)cp ./*.ttl ../bin/$(BUNDLE)
+	$(QUIET)$(TTLUPDATE)
+	$(QUIET)$(TTLUPDATEGUI)
 	$(QUIET)cp ./*.$(LIB_EXT) ../bin/$(BUNDLE)
 	@if [ -f ../bin/$(BUNDLE)/$(EXEC_NAME)_ui.$(LIB_EXT) ]; then \
 		$(B_ECHO) "build finish, . . . $(reset)"; \
