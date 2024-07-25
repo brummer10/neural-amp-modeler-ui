@@ -55,7 +55,8 @@ ifeq ($(TARGET), Linux)
 	-shared -lm -fPIC -Wl,-z,noexecstack -Wl,--no-undefined -Wl,--gc-sections
 
 	CFLAGS := -O2 -D_FORTIFY_SOURCE=2 -Wall -fstack-protector -fvisibility=hidden \
-	-fdata-sections -Wl,--gc-sections -Wl,-z,relro,-z,now -Wl,--exclude-libs,ALL
+	-fdata-sections -Wl,--gc-sections -Wl,-z,relro,-z,now -Wl,--exclude-libs,ALL \
+	-Wno-unused-result
 
 else ifeq ($(TARGET), Windows)
 
@@ -64,7 +65,7 @@ else ifeq ($(TARGET), Windows)
 	-L. $(LIB_DIR)libxputty.$(STATIC_LIB_EXT) -shared -lm $(PAWPAW_LFLAGS)
 
 	CFLAGS := -O2 -D_FORTIFY_SOURCE=2 -Wall -fstack-protector -fvisibility=hidden \
-	-fdata-sections -Wl,--gc-sections -Wl,--exclude-libs,ALL
+	-fdata-sections -Wl,--gc-sections -Wl,--exclude-libs,ALL -Wno-unused-result
 
 	TTLUPDATE = sed -i '/lv2:binary/ s/\.so/\.dll/ ' ../bin/$(BUNDLE)/manifest.ttl
 	TTLUPDATEGUI = sed -i '/a guiext:X11UI/ s/X11UI/WindowsUI/ ; /lv2:binary/ s/\.so/\.dll/ ' ../bin/$(BUNDLE)/$(NAME)_ui.ttl
