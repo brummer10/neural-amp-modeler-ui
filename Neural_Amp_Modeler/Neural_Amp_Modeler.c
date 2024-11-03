@@ -221,7 +221,7 @@ static void file_menu_callback(void *w_, void* user_data) {
 }
 
 
-void strrem(char *str, const char *sub) {
+void strrem_(char *str, const char *sub) {
     char *p, *q, *r;
     if ((q = r = strstr(str, sub)) != NULL) {
         size_t len = strlen(sub);
@@ -246,12 +246,12 @@ void read_meta_data(const char* nam_file, X11_UI* ui) {
         while(ptr != NULL) {
             if (strstr(ptr, "name") != NULL) {
                 ptr = strtok(NULL, ",");
-                strrem(ptr, "\"");
+                strrem_(ptr, "\"");
                 if (strlen(ptr) && !strstr(ptr, "null"))
                     strncpy(ui->uiModelName, ptr, 123);
             } else if (strstr(ptr, "modeled_by") != NULL) {
                 ptr = strtok(NULL, ",");
-                strrem(ptr, "\"");
+                strrem_(ptr, "\"");
                 if (strlen(ptr) && !strstr(ptr, "null")) {
                     strncpy(ui->uiModelBy, "by: ", 6);
                     strncat(ui->uiModelBy, ptr, 117);
