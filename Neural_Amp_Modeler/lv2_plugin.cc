@@ -532,7 +532,7 @@ Widget_t *add_my_file_button(Widget_t *parent, int x, int y, int width, int heig
 
 Widget_t* add_lv2_file_button(Widget_t *w, Widget_t *p, PortIndex index, const char * label,
                                 X11_UI* ui, int x, int y, int width, int height) {
-    w = add_my_file_button(p, x, y, width, height, "", ".nam");
+    w = add_my_file_button(p, x, y, width, height, "", ".nam|.aidax|.json");
     w->data = index;
     return w;
 }
