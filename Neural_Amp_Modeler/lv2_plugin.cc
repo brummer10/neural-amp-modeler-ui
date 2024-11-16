@@ -138,11 +138,11 @@ static void draw_window(void *w_, void* user_data) {
     use_text_color_scheme(w, NORMAL_);
     cairo_stroke (w->crb);
     cairo_set_source_rgba(w->crb, 0.1, 0.1, 0.1, 1);
-    round_rectangle(w->crb, 90 * w->app->hdpi, w->scale.init_height-55 * w->app->hdpi,
-                                            350 * w->app->hdpi, 30 * w->app->hdpi, 0.5);
+    round_rectangle(w->crb, 50 * w->app->hdpi, w->scale.init_height-55 * w->app->hdpi,
+                                            400 * w->app->hdpi, 30 * w->app->hdpi, 0.5);
     cairo_fill_preserve (w->crb);
-    boxShadowInset(w->crb,90 * w->app->hdpi,w->scale.init_height-55 * w->app->hdpi,
-                                            350 * w->app->hdpi, 30 * w->app->hdpi, true);
+    boxShadowInset(w->crb,50 * w->app->hdpi,w->scale.init_height-55 * w->app->hdpi,
+                                            400 * w->app->hdpi, 30 * w->app->hdpi, true);
     cairo_fill (w->crb);
     if (w->image) {
         cairo_set_source_surface (w->crb, w->image, 0, 0);
@@ -159,15 +159,15 @@ static void draw_window(void *w_, void* user_data) {
         cairo_set_font_size (w->crb, w->app->normal_font);
         int slen = strlen(basename(ps->filename));
         
-        if ((slen - 4) > 48) {
-            utf8crop(label,basename(ps->filename), 48);
+        if ((slen - 4) > 46) {
+            utf8crop(label,basename(ps->filename), 46);
             strcat(label,"...");
-            tooltip_set_text(ui->widget[0],basename(ps->filename));
-            ui->widget[0]->flags |= HAS_TOOLTIP;
+            tooltip_set_text(ui->file_button,basename(ps->filename));
+            ui->file_button->flags |= HAS_TOOLTIP;
         } else {
             strcpy(label, basename(ps->filename));
-            ui->widget[0]->flags &= ~HAS_TOOLTIP;
-            hide_tooltip(ui->widget[0]);
+            ui->file_button->flags &= ~HAS_TOOLTIP;
+            hide_tooltip(ui->file_button);
         }
 
         cairo_text_extents(w->crb, label, &extents_f);
@@ -398,7 +398,7 @@ void draw_my_button(void *w_, void* user_data) {
     if (!w->state && (int)w->adj_y->value)
         w->state = 3;
 
-    roundrec(w->crb,2.0, 4.0, width, height, height*0.33);
+  /*  roundrec(w->crb,2.0, 4.0, width, height, height*0.33);
 
     if(w->state==0) {
         cairo_set_line_width(w->crb, 1.0);
@@ -423,7 +423,7 @@ void draw_my_button(void *w_, void* user_data) {
     } else if (w->state==3) {
         roundrec(w->crb,3.0, 4.0, width, height, height*0.33);
         cairo_stroke(w->crb);
-    }
+    } */
 
     float offset = 0.0;
     if(w->state==0) {
@@ -454,11 +454,56 @@ void draw_my_button(void *w_, void* user_data) {
 
 Widget_t* add_lv2_button(Widget_t *w, Widget_t *p, const char * label,
                                 X11_UI* ui, int x, int y, int width, int height) {
-    w = add_combobox(p, label, x, y, width, height);
+    w = add_combobox(p, label, x-330, y, width+330, height);
     w->parent_struct = ui;
     w->func.expose_callback = dummy_expose;
     w->childlist->childs[0]->func.expose_callback = draw_my_button;
     return w;
+}
+
+static void draw_image_(Widget_t *w, int width_t, int height_t, float offset) {
+    int width, height;
+    os_get_surface_size(w->image, &width, &height);
+    //double half_width = (width/height >=2) ? width*0.5 : width;
+    double x = (double)width_t/(double)(width);
+    double y = (double)height_t/(double)height;
+    double x1 = (double)height/(double)height_t;
+    double y1 = (double)(width)/(double)width_t;
+    double off_set = offset*x1;
+    cairo_scale(w->crb, x,y);
+    if((int)w->adj_y->value) {
+        roundrec(w->crb,0, 0, width, height, height* 0.22);
+        cairo_set_source_rgba(w->crb, 0.3, 0.3, 0.3, 0.4);
+        cairo_fill(w->crb);
+    }
+    cairo_set_source_surface (w->crb, w->image, off_set, off_set);
+    cairo_rectangle(w->crb,0, 0, width, height);
+    cairo_fill(w->crb);
+    cairo_scale(w->crb, x1,y1);
+}
+
+static void draw_i_button(void *w_, void* user_data) {
+    Widget_t *w = (Widget_t*)w_;
+    if (!w) return;
+    Metrics_t metrics;
+    os_get_window_metrics(w, &metrics);
+    int width = metrics.width-5;
+    int height = metrics.height-5;
+    if (!metrics.visible) return;
+    if (w->image) {
+        float offset = 0.0;
+        if(w->state==1 && ! (int)w->adj_y->value) {
+            offset = 1.0;
+        } else if(w->state==1) {
+            offset = 2.0;
+        } else if(w->state==2) {
+            offset = 2.0;
+        } else if(w->state==3) {
+            offset = 1.0;
+        }
+        
+       draw_image_(w, width, height,offset);
+   }
 }
 
 static void my_fdialog_response(void *w_, void* user_data) {
@@ -526,6 +571,7 @@ Widget_t *add_my_file_button(Widget_t *parent, int x, int y, int width, int heig
     fbutton->func.mem_free_callback = my_fbutton_mem_free;
     fbutton->func.value_changed_callback = my_fbutton_callback;
     fbutton->func.dialog_callback = my_fdialog_response;
+    fbutton->func.expose_callback = draw_i_button;
     return fbutton;
 }
 
@@ -533,6 +579,7 @@ Widget_t *add_my_file_button(Widget_t *parent, int x, int y, int width, int heig
 Widget_t* add_lv2_file_button(Widget_t *w, Widget_t *p, PortIndex index, const char * label,
                                 X11_UI* ui, int x, int y, int width, int height) {
     w = add_my_file_button(p, x, y, width, height, "", ".nam|.aidax|.json");
+    widget_get_png(w, LDVAR(neuraldir_png));
     w->data = index;
     return w;
 }
