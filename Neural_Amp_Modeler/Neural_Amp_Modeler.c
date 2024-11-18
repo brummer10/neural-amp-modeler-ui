@@ -357,6 +357,7 @@ void plugin_create_controller_widgets(X11_UI *ui, const char * plugin_uri) {
 
     ui->file_button = add_lv2_button(ui->file_button, ui->win, "", ui, 415,  254, 22, 30);
     combobox_set_pop_position(ui->file_button, 0);
+    combobox_set_entry_length(ui->file_button, 48);
     combobox_add_entry(ui->file_button, "None");
     ui->file_button->func.value_changed_callback = file_menu_callback;
 }
