@@ -53,10 +53,13 @@ ifeq ($(TARGET), Linux)
 	LDFLAGS += -fvisibility=hidden -I$(HEADER_DIR) -Wl,-Bstatic -L. $(UI_LIB) \
 	-Wl,-Bdynamic `pkg-config --cflags --libs cairo x11 lv2` -pthread -lpthread \
 	-shared -lm -fPIC -Wl,-z,noexecstack -Wl,--no-undefined -Wl,--gc-sections
-
+ifneq (,$(filter debug,$(MAKECMDGOALS)))
+	CFLAGS := -g -DDEBUG
+else
 	CFLAGS := -O2 -D_FORTIFY_SOURCE=2 -Wall -fstack-protector -fvisibility=hidden \
 	-fdata-sections -Wl,--gc-sections -Wl,-z,relro,-z,now -Wl,--exclude-libs,ALL \
 	-Wno-unused-result
+endif
 
 else ifeq ($(TARGET), Windows)
 
@@ -88,6 +91,8 @@ all: $(RESOURCEHEADER) $(EXEC_NAME)
 	else \
 		$(R_ECHO) "sorry, build failed$(reset)"; \
 	fi
+
+debug: all
 
 $(RESOURCEHEADER): $(RESOURCES_OBJ)
 	@rm -f $(RESOURCEHEADER)
@@ -128,7 +133,9 @@ $(EXEC_NAME):$(RESOURCES_OBJ) $(SVGRESOURCES_OBJ)
 	@# use this line when you include libxputty as submodule
 	$(QUIET)$(CC) -DUSE_ATOM  $(CFLAGS) '$(NAME).c' -L. $(RESOURCES_LIB) -L. $(SVGRESOURCES_LIB) $(UI_LIB) -o '$(EXEC_NAME)_ui.$(LIB_EXT)' $(LDFLAGS) -I./ -I$(HEADER_DIR)
 	@#$(CC) -DUSE_ATOM  $(CFLAGS) '$(NAME).c' -L. $(RESOURCES_LIB) -L. $(SVGRESOURCES_LIB) -o '$(EXEC_NAME)_ui.$(LIB_EXT)' $(LDFLAGS) -I./
+ifeq (,$(filter debug,$(MAKECMDGOALS)))
 	$(QUIET)$(STRIP) -s -x -X -R .comment -R .note.ABI-tag $(EXEC_NAME)_ui.$(LIB_EXT)
+endif
 
 $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE):
 	@$(error "Couldn't find neural_amp_modeler.lv2 install location")
