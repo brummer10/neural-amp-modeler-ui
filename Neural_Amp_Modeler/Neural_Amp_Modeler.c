@@ -1,6 +1,6 @@
 
 
-#define CONTROLS 3
+#define CONTROLS 4
 
 #define GUI_ELEMENTS 0
 
@@ -354,6 +354,11 @@ void plugin_create_controller_widgets(X11_UI *ui, const char * plugin_uri) {
     set_adjustment(ui->widget[2]->adj, 0.0, 0.0, -20.0, 20.0, 0.2, CL_CONTINUOS);
     set_widget_color(ui->widget[2], 0, 0, 0.3, 0.55, 0.91, 1.0);
     set_widget_color(ui->widget[2], 0, 3,  0.682, 0.686, 0.686, 1.0);
+
+    ui->widget[3] = add_lv2_knob (ui->widget[3], ui->win, 6, "Quality", ui, 210, 119, 80, 100);
+    set_adjustment(ui->widget[3]->adj, 1.0, 1.0, 0.0, 1.0, 0.01, CL_CONTINUOS);
+    set_widget_color(ui->widget[3], 0, 0, 0.3, 0.55, 0.91, 1.0);
+    set_widget_color(ui->widget[3], 0, 3,  0.682, 0.686, 0.686, 1.0);
 
     ui->file_button = add_lv2_button(ui->file_button, ui->win, "", ui, 415,  254, 22, 30);
     combobox_set_pop_position(ui->file_button, 0);
