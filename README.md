@@ -2,7 +2,7 @@
 
 This is a Gui for the [Neural Amp Modeler LV2 plugin](https://github.com/mikeoliphant/neural-amp-modeler-lv2) by Mike Oliphant
 
-![Neural Amp Modeler UI](https://raw.githubusercontent.com/brummer10/neural-amp-modeler-ui/master/Neural_Amp_Modeler.png)
+![Neural Amp Modeler UI](https://raw.githubusercontent.com/brummer10/neural-amp-modeler-ui/main/Neural_Amp_Modeler.png)
 
 It requires that the [Neural Amp Modeler LV2 plugin](https://github.com/mikeoliphant/neural-amp-modeler-lv2)
 is installed. Otherwise it will refuse to be installed.
