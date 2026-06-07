@@ -3,8 +3,12 @@
 	# check if user is root
 	user = $(shell whoami)
 	ifeq ($(user),root)
+	ifneq (,$(wildcard /usr/local/lib/lv2/neural_amp_modeler.lv2))
+	INSTALL_DIR = /usr/local/lib/lv2
+	else
 	INSTALL_DIR = /usr/lib/lv2
-	else 
+	endif
+	else
 	INSTALL_DIR = ~/.lv2
 	endif
 
@@ -138,7 +142,7 @@ ifeq (,$(filter debug,$(MAKECMDGOALS)))
 endif
 
 $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE):
-	@$(error "Couldn't find neural_amp_modeler.lv2 install location")
+	@$(error Couldn't find install location: $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE))
 
 install : | $(DESTDIR)$(INSTALL_DIR)/$(IBUNDLE)
 ifneq ("$(wildcard ../bin/$(BUNDLE))","")
